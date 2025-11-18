@@ -1,5 +1,4 @@
 <?php
-// api/index.php
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=utf-8");
 header("Access-Control-Allow-Headers: Content-Type");
@@ -10,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-require_once 'modelo.php';
+require_once __DIR__ . '/modelo.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -19,30 +18,41 @@ if ($method === 'GET') {
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
+$input = json_decode(file_get_contents('php://input'), true) ?? [];
 
 switch ($method) {
-    case 'POST': // crear
+    case 'POST':
         if (empty($input['titulo'])) {
             http_response_code(400);
             echo json_encode(['error' => 'Titulo requerido']);
             exit;
         }
         $id = crearTarea($input['titulo']);
-        echo json_encode(['mensaje'=>'Tarea creada', 'id'=>$id]);
+        echo json_encode(['mensaje' => 'Tarea creada', 'id' => $id]);
         break;
 
-    case 'PUT': // actualizar (espera id, titulo, completada)
-        if (empty($input['id'])) { http_response_code(400); echo json_encode(['error'=>'id requerido']); exit; }
-        actualizarTarea($input['id'], $input['titulo'] ?? '', $input['completada'] ?? 0);
+    case 'PUT':
+        if (empty($input['id'])) {
+            http_response_code(400);
+            echo json_encode(['error'=>'id requerido']);
+            exit;
+        }
+        actualizarTarea(
+            $input['id'],
+            $input['titulo'] ?? '',
+            $input['completada'] ?? 0
+        );
         echo json_encode(['mensaje'=>'Actualizado']);
         break;
 
     case 'DELETE':
-        // dejar id en query string o en body
         parse_str(file_get_contents('php://input'), $deldata);
         $id = $deldata['id'] ?? ($_GET['id'] ?? null);
-        if (!$id) { http_response_code(400); echo json_encode(['error'=>'id requerido']); exit; }
+        if (!$id) {
+            http_response_code(400);
+            echo json_encode(['error'=>'id requerido']);
+            exit;
+        }
         borrarTarea($id);
         echo json_encode(['mensaje'=>'Borrado']);
         break;
