@@ -13,7 +13,7 @@ $options = [
 ];
 
 try {
-    $conexion = new PDO(
+    $pdo = new PDO(
         "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4",
         $user,
         $password,
